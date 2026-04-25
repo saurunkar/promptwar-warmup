@@ -1,10 +1,15 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 google-cloud-firestore
 google-cloud-aiplatform
+google-cloud-logging
+google-cloud-pubsub
+google-cloud-secret-manager
+google-generativeai
 google-auth
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
 requests
+numpy
