@@ -1,27 +1,42 @@
 from google.cloud import firestore
 import os
-from models.user import UserProfile
+from models.user import UserProfile, LearningState
 
 class DatabaseClient:
     def __init__(self):
-        self.project_id = os.getenv("GCP_PROJECT_ID")
+        self.project_id = os.getenv("GCP_PROJECT_ID", "gdgpune-455206")
         if self.project_id:
-            self.db = firestore.Client(project=self.project_id)
+            try:
+                self.db = firestore.Client(project=self.project_id)
+            except Exception as e:
+                print(f"Error initializing Firestore: {e}")
+                self.db = None
         else:
             self.db = None
-            print("Running with Mock Database")
 
     async def get_user_profile(self, user_id: str) -> UserProfile:
         if self.db:
-            doc = self.db.collection("users").document(user_id).get()
-            if doc.exists:
-                return UserProfile(**doc.to_dict())
+            try:
+                doc = self.db.collection("users").document(user_id).get()
+                if doc.exists:
+                    data = doc.to_dict()
+                    # Ensure all new fields are handled
+                    return UserProfile(**data)
+            except Exception as e:
+                print(f"Error fetching profile: {e}")
         
-        # Return default profile if not found or no DB
-        return UserProfile(user_id=user_id, knowledge_graph={"concepts": {"Neural Networks": 0.5, "Calculus": 0.2}})
+        # Return default profile for new users
+        return UserProfile(
+            user_id=user_id, 
+            current_state=LearningState.IDLE,
+            knowledge_graph={"concepts": {"Neural Networks": 0.5}}
+        )
 
     async def save_user_profile(self, profile: UserProfile):
         if self.db:
-            self.db.collection("users").document(profile.user_id).set(profile.dict())
+            try:
+                self.db.collection("users").document(profile.user_id).set(profile.dict())
+            except Exception as e:
+                print(f"Error saving profile: {e}")
         else:
-            print(f"Mock Save: Profile for {profile.user_id} updated.")
+            print(f"Mock Save: {profile.user_id} state is now {profile.current_state}")
