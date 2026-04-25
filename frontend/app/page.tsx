@@ -29,6 +29,16 @@ interface SessionStats {
   responseTimesMs: number[];
 }
 
+interface UserProfileData {
+  user_id: string;
+  current_state: string;
+  current_topic: string | null;
+  learning_style: string;
+  pace: string;
+  knowledge_graph: Record<string, number>;
+  weak_areas: string[];
+}
+
 export default function Home() {
   const [userId] = useState("user-001");
   const [query, setQuery] = useState("");
@@ -36,7 +46,7 @@ export default function Home() {
     { role: 'assistant', content: "👋 Welcome to Aegis! I'm your AI learning companion powered by Google Gemini.\n\nI adapt to your pace and style. Try:\n• \"Explain Neural Networks\"\n• \"Teach me Calculus\"\n• \"What is Machine Learning?\"\n\nLet's begin your learning journey!", type: 'welcome' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [activeState, setActiveState] = useState("idle");
   const [currentTopic, setCurrentTopic] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
@@ -95,7 +105,7 @@ export default function Home() {
         setActiveState(data.state || "idle");
         setCurrentTopic(data.topic);
         if (data.knowledge) {
-          setProfile((prev: any) => prev ? { ...prev, knowledge_graph: data.knowledge } : prev);
+          setProfile((prev) => prev ? { ...prev, knowledge_graph: data.knowledge } : prev);
         }
         // Update stats
         setStats(prev => ({
@@ -170,7 +180,7 @@ export default function Home() {
         }));
 
         if (fb.updated_knowledge) {
-          setProfile((prev: any) => prev ? { ...prev, knowledge_graph: fb.updated_knowledge, weak_areas: fb.weak_areas } : prev);
+          setProfile((prev) => prev ? { ...prev, knowledge_graph: fb.updated_knowledge, weak_areas: fb.weak_areas } : prev);
         }
 
         if (quizIndex < quiz.length - 1) {
@@ -214,7 +224,7 @@ export default function Home() {
 
   const knowledgeEntries = profile?.knowledge_graph ? Object.entries(profile.knowledge_graph) : [];
   const totalMastery = knowledgeEntries.length > 0
-    ? Math.round((knowledgeEntries.reduce((sum: number, [, v]: any) => sum + v, 0) / knowledgeEntries.length) * 100)
+    ? Math.round((knowledgeEntries.reduce((sum: number, [, v]) => sum + (v as number), 0) / knowledgeEntries.length) * 100)
     : 0;
   const accuracy = stats.totalAnswers > 0 ? Math.round((stats.correctAnswers / stats.totalAnswers) * 100) : 0;
   const avgResponseTime = stats.responseTimesMs.length > 0
@@ -273,8 +283,8 @@ export default function Home() {
           <div className="section">
             <h3 className="section-title">Knowledge Graph</h3>
             <div className="concept-list">
-              {knowledgeEntries.length > 0 ? knowledgeEntries.map(([concept, score]: any) => (
-                <ConceptBar key={concept} label={concept} score={score} />
+              {knowledgeEntries.length > 0 ? knowledgeEntries.map(([concept, score]) => (
+                <ConceptBar key={concept} label={concept} score={score as number} />
               )) : (
                 <p className="empty-text">Start learning to build your graph!</p>
               )}

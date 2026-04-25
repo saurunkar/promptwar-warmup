@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 
 from agents.orchestrator import LearningOrchestrator
 from agents.sub_agents import AssessmentAgent, FeedbackAgent, AdaptationAgent, ContentGeneratorAgent
@@ -87,7 +87,7 @@ async def log_requests(request: Request, call_next):
 
 # ─── Health Check ────────────────────────────────────────────────
 @app.get("/")
-async def root():
+async def root() -> Dict[str, Any]:
     return {
         "service": "Aegis Learning Assistant",
         "version": "3.0.0",
@@ -99,12 +99,12 @@ async def root():
     }
 
 @app.get("/health")
-async def health():
+async def health() -> Dict[str, str]:
     return {"status": "ok"}
 
 # ─── Core: Ask Endpoint ─────────────────────────────────────────
 @app.post("/ask")
-async def ask_question(request: UserQuery):
+async def ask_question(request: UserQuery) -> Dict[str, Any]:
     """Main learning interaction — orchestrates all agents."""
     if not validate_user_id(request.user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -127,7 +127,7 @@ async def ask_question(request: UserQuery):
 
 # ─── Quiz: Generate ──────────────────────────────────────────────
 @app.post("/quiz")
-async def generate_quiz(request: QuizRequest):
+async def generate_quiz(request: QuizRequest) -> Dict[str, Any]:
     """Generate a personalized quiz for the user."""
     if not validate_user_id(request.user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -155,7 +155,7 @@ async def generate_quiz(request: QuizRequest):
 
 # ─── Quiz: Submit Answer ─────────────────────────────────────────
 @app.post("/feedback")
-async def submit_answer(answer: QuizAnswer):
+async def submit_answer(answer: QuizAnswer) -> Dict[str, Any]:
     """Evaluate a quiz answer and update the knowledge graph."""
     if not validate_user_id(answer.user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -204,7 +204,7 @@ async def submit_answer(answer: QuizAnswer):
 
 # ─── Profile: Get ────────────────────────────────────────────────
 @app.get("/profile/{user_id}")
-async def get_profile(user_id: str):
+async def get_profile(user_id: str) -> Dict[str, Any]:
     """Get user profile with full knowledge graph."""
     if not validate_user_id(user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -224,7 +224,7 @@ async def get_profile(user_id: str):
 
 # ─── Profile: Update Preferences ─────────────────────────────────
 @app.put("/profile")
-async def update_profile(update: ProfileUpdate):
+async def update_profile(update: ProfileUpdate) -> Dict[str, Any]:
     """Update user learning preferences."""
     if not validate_user_id(update.user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -250,7 +250,7 @@ async def update_profile(update: ProfileUpdate):
 
 # ─── Content: Generate ───────────────────────────────────────────
 @app.post("/content")
-async def generate_content(request: UserQuery):
+async def generate_content(request: UserQuery) -> Dict[str, Any]:
     """Generate personalized educational content."""
     if not validate_user_id(request.user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -261,7 +261,7 @@ async def generate_content(request: UserQuery):
 
 # ─── Progress: Update ────────────────────────────────────────────
 @app.post("/update-progress")
-async def update_progress(update: InteractionUpdate):
+async def update_progress(update: InteractionUpdate) -> Dict[str, Any]:
     """Directly update knowledge graph (legacy endpoint)."""
     if not validate_user_id(update.user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID format")

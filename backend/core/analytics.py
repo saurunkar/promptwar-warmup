@@ -6,7 +6,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,18 @@ try:
 except ImportError:
     CLOUD_LOGGING_AVAILABLE = False
 
+# Try to import BigQuery
+try:
+    from google.cloud import bigquery
+    BIGQUERY_AVAILABLE = True
+except ImportError:
+    BIGQUERY_AVAILABLE = False
+
 
 class AnalyticsClient:
     """Publishes learning events to Pub/Sub and logs to Cloud Logging."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.project_id = os.getenv("GCP_PROJECT_ID", "gdgpune-455206")
         self.topic_name = os.getenv("PUBSUB_TOPIC", "learning-events")
         self.publisher = None
@@ -43,6 +50,15 @@ class AnalyticsClient:
             except Exception as e:
                 logger.warning(f"Cloud Logging init failed: {e}")
 
+        # Initialize BigQuery (for advanced analytics, placeholder for future use)
+        if BIGQUERY_AVAILABLE:
+            try:
+                self.bq_client = bigquery.Client(project=self.project_id)
+                logger.info("BigQuery client initialized.")
+            except Exception as e:
+                logger.warning(f"BigQuery init failed: {e}")
+                self.bq_client = None
+
         # Initialize Pub/Sub publisher
         if PUBSUB_AVAILABLE:
             try:
@@ -53,7 +69,7 @@ class AnalyticsClient:
                 logger.warning(f"Pub/Sub init failed (will log locally): {e}")
                 self.publisher = None
 
-    async def track_event(self, event_type: str, user_id: str, data: Optional[Dict] = None):
+    async def track_event(self, event_type: str, user_id: str, data: Optional[Dict[str, Any]] = None) -> None:
         """
         Track a learning event. Published to Pub/Sub if available,
         otherwise logged locally.
@@ -83,19 +99,19 @@ class AnalyticsClient:
             # Local fallback
             logger.info(f"[LOCAL EVENT] {event_type} | user={user_id} | data={data}")
 
-    async def track_query(self, user_id: str, query: str, response_type: str):
+    async def track_query(self, user_id: str, query: str, response_type: str) -> None:
         await self.track_event("query", user_id, {
             "query": query[:500],  # Truncate for storage
             "response_type": response_type,
         })
 
-    async def track_quiz(self, user_id: str, concept: str, score: float):
+    async def track_quiz(self, user_id: str, concept: str, score: float) -> None:
         await self.track_event("quiz_answered", user_id, {
             "concept": concept,
             "score": score,
         })
 
-    async def track_state_change(self, user_id: str, old_state: str, new_state: str):
+    async def track_state_change(self, user_id: str, old_state: str, new_state: str) -> None:
         await self.track_event("state_change", user_id, {
             "from": old_state,
             "to": new_state,

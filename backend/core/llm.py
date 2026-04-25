@@ -6,7 +6,7 @@ import google.generativeai as genai
 import os
 import json
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class LLMClient:
     """Singleton-style LLM client with safety filters and structured output."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.api_key = os.getenv("GOOGLE_API_KEY")
         self.model = None
         self.embed_model = None
@@ -59,7 +59,7 @@ class LLMClient:
             logger.error(f"LLM generation error: {e}")
             return f"I encountered an issue generating a response. Please try again."
 
-    async def generate_json(self, prompt: str, system_instruction: str = "") -> Optional[Dict]:
+    async def generate_json(self, prompt: str, system_instruction: str = "") -> Optional[Dict[str, Any]]:
         """Generate structured JSON output from Gemini."""
         json_prompt = f"{prompt}\n\nIMPORTANT: Respond ONLY with valid JSON. No markdown, no code fences, no explanation."
         text = await self.generate(json_prompt, system_instruction)

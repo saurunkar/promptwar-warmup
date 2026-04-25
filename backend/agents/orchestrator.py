@@ -3,7 +3,7 @@ Learning Orchestrator — Primary Agent that coordinates all sub-agents,
 manages learning states, provides RAG context, and tracks session memory.
 """
 import logging
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from models.user import UserProfile, LearningState
 from core.llm import llm_client
 from core.security import sanitize_input, filter_output
@@ -29,11 +29,11 @@ class LearningOrchestrator:
     and when to simplify based on user state and knowledge graph.
     """
 
-    def __init__(self, user_profile: UserProfile, db_client=None):
+    def __init__(self, user_profile: UserProfile, db_client: Optional[Any] = None) -> None:
         self.profile = user_profile
         self.db = db_client
 
-    async def decide_next_step(self, user_query: str) -> Dict:
+    async def decide_next_step(self, user_query: str) -> Dict[str, Any]:
         """
         Main orchestration loop:
         1. Sanitize input
@@ -112,7 +112,7 @@ Topic:"""
             return self.profile.current_topic  # Keep existing topic
         return topic
 
-    async def _handle_introduction(self, query: str) -> Dict:
+    async def _handle_introduction(self, query: str) -> Dict[str, Any]:
         """Introduction state: High-level overview adapted to learning style."""
         context = self._build_context()
         session_history = self._get_session_context()
@@ -141,7 +141,7 @@ User's question: {query}"""
             "suggested_actions": ["Explain in Detail", "Give Example", "Simplify"],
         }
 
-    async def _handle_deep_dive(self, query: str) -> Dict:
+    async def _handle_deep_dive(self, query: str) -> Dict[str, Any]:
         """Deep dive state: Detailed technical breakdown with misconception awareness."""
         context = self._build_context()
         session_history = self._get_session_context()
@@ -177,7 +177,7 @@ User's question: {query}"""
             "suggested_actions": ["Take a Quiz", "Ask Follow-up", "Show Code Example"],
         }
 
-    async def _handle_practice(self, query: str) -> Dict:
+    async def _handle_practice(self, query: str) -> Dict[str, Any]:
         """Practice state: Offer assessment to test understanding."""
         return {
             "type": "quiz_offer",
@@ -185,7 +185,7 @@ User's question: {query}"""
             "suggested_actions": ["Start Quiz", "Review Concepts", "Move to Next Topic"],
         }
 
-    async def _handle_mastery_review(self, query: str) -> Dict:
+    async def _handle_mastery_review(self, query: str) -> Dict[str, Any]:
         """Mastery review: Spaced repetition and advanced questions."""
         context = self._build_context()
 
@@ -206,7 +206,7 @@ User's message: {query}"""
             "suggested_actions": ["Answer", "Skip to New Topic", "See My Progress"],
         }
 
-    async def _handle_general_query(self, query: str) -> Dict:
+    async def _handle_general_query(self, query: str) -> Dict[str, Any]:
         """Handle general queries outside the state machine."""
         context = self._build_context()
         session_history = self._get_session_context()

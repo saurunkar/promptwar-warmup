@@ -6,7 +6,7 @@ from google.cloud import firestore
 import os
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from models.user import UserProfile, LearningState, KnowledgeGraph
 
 logger = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ class DatabaseClient:
 
     # ─── Content Store Operations ────────────────────────────────
 
-    async def get_content(self, topic: str) -> Optional[Dict]:
+    async def get_content(self, topic: str) -> Optional[Dict[str, Any]]:
         """Retrieve educational content for a topic from the content store."""
         if self.db:
             try:
@@ -83,7 +83,7 @@ class DatabaseClient:
             "difficulty_levels": ["beginner", "intermediate", "advanced"],
         }
 
-    async def save_content(self, topic: str, content: Dict):
+    async def save_content(self, topic: str, content: Dict[str, Any]) -> None:
         """Save educational content to Firestore."""
         if self.db:
             try:
@@ -95,7 +95,7 @@ class DatabaseClient:
 
     # ─── Interaction History ─────────────────────────────────────
 
-    async def save_interaction(self, user_id: str, interaction: Dict):
+    async def save_interaction(self, user_id: str, interaction: Dict[str, Any]) -> None:
         """Save a learning interaction to Firestore for analytics."""
         if self.db:
             try:
@@ -109,7 +109,7 @@ class DatabaseClient:
 
     # ─── Session Memory (Short-term) ─────────────────────────────
 
-    def get_session(self, user_id: str) -> Dict:
+    def get_session(self, user_id: str) -> Dict[str, Any]:
         """Get the in-memory session context for a user."""
         if user_id not in self._sessions:
             self._sessions[user_id] = {
@@ -119,12 +119,12 @@ class DatabaseClient:
             }
         return self._sessions[user_id]
 
-    def update_session(self, user_id: str, key: str, value):
+    def update_session(self, user_id: str, key: str, value: Any) -> None:
         """Update a session value."""
         session = self.get_session(user_id)
         session[key] = value
 
-    def add_to_session_history(self, user_id: str, role: str, content: str):
+    def add_to_session_history(self, user_id: str, role: str, content: str) -> None:
         """Add a message to the session's conversation history."""
         session = self.get_session(user_id)
         session["messages"].append({
@@ -136,7 +136,7 @@ class DatabaseClient:
         if len(session["messages"]) > 20:
             session["messages"] = session["messages"][-20:]
 
-    def get_session_history(self, user_id: str, last_n: int = 5) -> List[Dict]:
+    def get_session_history(self, user_id: str, last_n: int = 5) -> List[Dict[str, Any]]:
         """Get the last N messages from the session."""
         session = self.get_session(user_id)
         return session["messages"][-last_n:]

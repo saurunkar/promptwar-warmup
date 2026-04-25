@@ -4,7 +4,7 @@ for the Agentic Learning Assistant.
 """
 import json
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from models.user import UserProfile, InteractionUpdate, LearningState
 from core.llm import llm_client
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class AssessmentAgent:
     """Generates personalized quizzes based on user proficiency and learning style."""
 
-    async def generate_quiz(self, concept: str, user_profile: UserProfile) -> Dict:
+    async def generate_quiz(self, concept: str, user_profile: UserProfile) -> Dict[str, Any]:
         score = user_profile.knowledge_graph.concepts.get(concept, 0.0)
         difficulty = "beginner" if score < 0.3 else "intermediate" if score < 0.7 else "advanced"
 
@@ -90,7 +90,7 @@ class FeedbackAgent:
     async def evaluate_answer(
         self, question: str, user_answer: str, correct_answer: str,
         concept: str, user_profile: UserProfile
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         prompt = f"""You are evaluating a student's answer to a quiz question.
 
 Concept: {concept}
@@ -127,7 +127,7 @@ class ContentGeneratorAgent:
 
     async def generate_content(
         self, topic: str, user_profile: UserProfile, content_type: str = "explanation"
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         style = user_profile.learning_style.value
         pace = user_profile.pace.value
         score = user_profile.knowledge_graph.concepts.get(topic, 0.0)
@@ -173,7 +173,7 @@ Make it engaging and memorable."""
 class AdaptationAgent:
     """Updates user knowledge models based on learning interactions."""
 
-    def __init__(self, db_client=None):
+    def __init__(self, db_client: Optional[Any] = None) -> None:
         self.db = db_client
 
     def update_knowledge_graph(
