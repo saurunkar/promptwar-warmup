@@ -14,6 +14,9 @@ COPY . .
 ARG NEXT_PUBLIC_API_URL=http://localhost:8080
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
+# Ensure public dir exists
+RUN mkdir -p public
+
 RUN npm run build
 
 # Production image using standalone output
@@ -25,6 +28,8 @@ ENV PORT=3000
 # Copy standalone output
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Copy public if it exists (use conditional copy)
 COPY --from=builder /app/public ./public
 
 EXPOSE 3000
