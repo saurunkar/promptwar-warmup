@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+google-cloud-firestore
+google-cloud-aiplatform
+google-auth
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+requests
