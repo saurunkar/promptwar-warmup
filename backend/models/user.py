@@ -1,5 +1,8 @@
+"""
+Pydantic Models — Data schemas for User Profiles, Knowledge Graphs, and Interactions.
+"""
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from enum import Enum
 
 class LearningStyle(str, Enum):
@@ -30,7 +33,7 @@ class UserProfile(BaseModel):
     current_state: LearningState = LearningState.IDLE
     current_topic: Optional[str] = None
     knowledge_graph: KnowledgeGraph = Field(default_factory=KnowledgeGraph)
-    history: List[Dict] = Field(default_factory=list)
+    history: List[Dict[str, Any]] = Field(default_factory=list)
     weak_areas: List[str] = Field(default_factory=list)
     misconceptions: Dict[str, List[str]] = Field(default_factory=dict) # concept -> list of misconceptions
 

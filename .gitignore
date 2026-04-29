@@ -1,0 +1,44 @@
+# ─── Aegis Production Gitignore ───
+
+# OS / Editor Files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.log
+
+# Local Testing Scripts
+local_test/
+test_gemini.py
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+backend/env/
+backend/.pytest_cache/
+backend/__pycache__/
+backend/tests/__pycache__/
+
+# Node.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/coverage/
+
+# Environments & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# GCP / Docker
+.gcloud/
+Dockerfile.dev
+docker-compose.override.yml
